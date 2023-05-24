@@ -126,7 +126,7 @@ Cada visão mostra um conjunto de métricas a seguir:
 ## 5. O produto Final do projeto
 Painel online, hospedado em uma cloud e disponível para acesso em qualquer dispotitivo conectado à internet.
 
-O painel pode ser acessado através desse link: link do streamlit
+O painel pode ser acessado através desse link: https://lucianom101-fome-zero.streamlit.app/
 
 ## 6. Conclusão
 O objetivo desse projeto é criar um conjunto de gráficos e/ou tabelas que exibam essas métricas da melhor forma possível para o CEO Guerra.
