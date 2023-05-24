@@ -15,7 +15,7 @@ from streamlit_folium import folium_static
 # ========================================================================================================================================#
 # 2. Importando a base de dados
 # ========================================================================================================================================#
-df = pd.read_csv('dataset/zomato.csv')
+# df = pd.read_csv('dataset/zomato.csv')
 
 # ========================================================================================================================================#
 # 3. Funções e dicionários
@@ -236,7 +236,7 @@ def fnc_calc_per_country( flag, tp_calc, df ):
 # ========================================================================================================================================#
 # 4. Limpezas
 # ========================================================================================================================================#
-
+df = pd.read_csv('dataset/zomato.csv')
 # 4.1. Renomeando as colunas
 df = rename_columns( df )
 
@@ -259,8 +259,6 @@ df = df.loc[( df['cuisines'] != 'Drinks Only') & ( df['cuisines'] != 'Mineira' )
 # 4.7. Removendo linhas duplicadas
 df = df.drop_duplicates()
 
-# st.dataframe(df)
-
 # ========================================================================================================================================#
 # 5. Barra Lateral
 # ========================================================================================================================================#
@@ -268,18 +266,14 @@ df = df.drop_duplicates()
 vImagemIcon = Image.open( 'images/home.png' )
 st.set_page_config( page_title='Home', page_icon=vImagemIcon, layout='wide' )
 
-# st.sidebar.divider()
+col1, col2 = st.sidebar.columns( 2, )
 
-with st.sidebar.container():
+with col1:
+    vImagem = Image.open( 'images/logo.png' )
+    st.image( vImagem, width=100 )
 
-    col1, col2 = st.sidebar.columns( 2, )
-
-    with col1:
-        vImagem = Image.open( 'images/logo.png' )
-        st.image( vImagem, width=140 )
-
-    with col2:
-        st.markdown( '# Fome Zero' )
+with col2: 
+    st.markdown( '# Fome Zero' )
 
 with st.sidebar.container():
     st.markdown( '## Filtros' )

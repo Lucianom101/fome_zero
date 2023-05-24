@@ -299,8 +299,6 @@ df = df.loc[( df['cuisines'] != 'Drinks Only') & ( df['cuisines'] != 'Mineira' )
 # 4.7. Removendo linhas duplicadas
 df = df.drop_duplicates()
 
-# st.dataframe(df)
-
 # ========================================================================================================================================#
 # 5. Barra Lateral
 # ========================================================================================================================================#
@@ -308,18 +306,14 @@ df = df.drop_duplicates()
 vImagemIcon = Image.open( 'images/home.png' )
 st.set_page_config( page_title='Home', page_icon=vImagemIcon, layout='wide' )
 
-# st.sidebar.divider()
+col1, col2 = st.sidebar.columns( 2, )
 
-with st.sidebar.container():
+with col1:
+    vImagem = Image.open( 'images/logo.png' )
+    st.image( vImagem, width=100 )
 
-    col1, col2 = st.sidebar.columns( 2, )
-
-    with col1:
-        vImagem = Image.open( 'images/logo.png' )
-        st.image( vImagem, width=140 )
-
-    with col2:
-        st.markdown( '# Fome Zero' )
+with col2: 
+    st.markdown( '# Fome Zero' )
 
 with st.sidebar.container():
     st.markdown( '## Filtros' )
@@ -332,18 +326,37 @@ with st.sidebar.container():
         default=[ 'Brazil', 'Canada', 'England', 'South Africa', 'Qatar', 'Australia' ]
     )
 
-with st.sidebar.container():
-    vRests = st.slider( 'Selecione a quantidade de restaurantes que deseja visualizar', 1, 20, 10 )
+    vQtdeRestaurantes = int( st.sidebar.slider(
+        label='Selecione a quantidade de Restaurantes que deseja visualizar',
+        value=10,
+        min_value=1,
+        max_value=20
+    ))
+
+    vCuisineUnique = df[ 'cuisines' ].unique()
+
+    vCuisine_select = st.sidebar.multiselect(
+        'Escolha os países que deseja visualizar os restaurantes',
+        vCuisineUnique,
+        default=[ 'Home-made', 'BBQ', 'Japanese', 'Brazilian', 'Arabian', 'American', 'Italian' ]
+    )
 
 # Garantindo os números sem aplicar o filtro
 df1 = df.copy()
+df2 = df.copy()
 
 # Filtro de País
 linhas_selecionadas = df['country_name'].isin( vPaises_select )
 df = df.loc[ linhas_selecionadas, : ]
+df2 = df.loc[ linhas_selecionadas, : ]
 
-# Filtro de quantidade de Restaurantes
-df = df.loc[ 0:vRests, : ]
+# Filtro de culinárias
+linhas_selecionadas = df['cuisines'].isin( vCuisine_select )
+df2 = df.loc[ linhas_selecionadas, : ]
+
+# Filtro de quantidade de restaurantes
+df = df.iloc[0:vQtdeRestaurantes].sort_values( 'aggregate_rating' )
+df2 = df.iloc[0:vQtdeRestaurantes].sort_values( 'aggregate_rating' )
 
 # ========================================================================================================================================#
 # 6. Countries
@@ -359,7 +372,6 @@ with st.container():
     col1, col2, col3, col4, col5 = st.columns(5)
 
     with col1:
-        st.markdown('teste')
         cols = [ 'aggregate_rating', 'restaurant_name', 'restaurant_id', 'country_name', 'city', 'average_cost_for_two', 'currency' ]
         df_aux = ( df1.loc[ ( df1[ 'cuisines' ] == 'Italian' ), cols ].groupby( [ 'restaurant_name', 'restaurant_id', 'country_name', 'city', 'average_cost_for_two', 'currency' ] )
                                                                      .mean()
@@ -425,9 +437,9 @@ with st.container():
                         'Média valor para dois: ' + df_aux['average_cost_for_two'][0].astype(float).astype(str) + '(' + df_aux['currency'][0] + ')' )
 
 with st.container():
-    st.markdown( '### Top 10 Restaurantes' )
+    st.markdown( '### Top ' + str( len( df2 ) ) + ' Restaurantes' )
     cols = [ 'restaurant_id', 'restaurant_name', 'country_name', 'city', 'cuisines', 'average_cost_for_two', 'aggregate_rating', 'votes' ]
-    st.dataframe( df.loc[ :, cols ].sort_values( [ 'aggregate_rating', 'votes' ], ascending=False ).head(10).reset_index() )
+    st.dataframe( df2.loc[ :, cols ].sort_values( [ 'aggregate_rating', 'votes' ], ascending=False ).head(len( df )).reset_index() )
 
 with st.container():
     col1, col2 = st.columns(2)
@@ -442,7 +454,7 @@ with st.container():
                      text='aggregate_rating',
                      title='Top 10 melhores tipos de culinária').update_layout( plot_bgcolor='white',
                                                                                 barmode='stack',
-                                                                                title_text='Top 10 melhores tipos de culinária',
+                                                                                title_text='Top ' + str( len( df ) ) + ' melhores tipos de culinária',
                                                                                 title_x=0.2)
         st.plotly_chart( fig, use_container_width=True )
     
@@ -456,6 +468,6 @@ with st.container():
                      text='aggregate_rating',
                      title='Top 10 piores tipos de culinária').update_layout( plot_bgcolor='white',
                                                                               barmode='stack',
-                                                                              title_text='Top 10 piores tipos de culinária',
+                                                                              title_text='Top ' + str( len( df ) ) + ' piores tipos de culinária',
                                                                               title_x=0.2)
         st.plotly_chart( fig, use_container_width=True )
