@@ -109,109 +109,6 @@ def fnc_calc_per_country( flag, tp_calc, df ):
     v02 = 0
     vList01 = []
     vList02 = []
-
-    # Quantidade de cidades registradas por pais
-    if flag == 1:
-        for i in df['country_name'].unique():
-            df_aux01 = df.loc[ ( df['country_name'] == i ), [ 'city' ] ]
-            v01 = len( df_aux01[ 'city' ].unique() )
-
-            vList01.append( i )
-            vList02.append( v01 )
-            data = { 'countries': vList01,
-                     'num_cities' : vList02 }
-
-            data = pd.DataFrame( data )
-
-            if v01 > v02:
-                v02 = v01
-                vMaiorPais = i
-
-        if tp_calc == 'grafico':
-            data.columns = [ 'Países', 'Quantidade de Cidades' ]
-            fig = go.Figure()
-            fig = ( px.bar(data,
-                           text='Quantidade de Cidades',
-                           x='Países', y='Quantidade de Cidades').update_traces( marker_color='#66b3ff' )
-                                                                      .update_layout( plot_bgcolor='white',
-                                                                                      barmode='stack',
-                                                                                      title_text='Quantidade de Cidades Registradas por País',
-                                                                                      title_x=0.3,
-                                                                                      xaxis={'categoryorder': 'total descending'} )
-                                                                    )
-            return fig
-        
-        elif tp_calc == 'maior':
-            return vMaiorPais
-
-    # Quantidade de restaurantes registrados por pais    
-    elif flag == 2:
-        for i in df['country_name'].unique():
-            df_aux01 = df.loc[ ( df['country_name'] == i ), [ 'restaurant_id' ] ]
-            v01 = len( df_aux01[ 'restaurant_id' ].unique() )
-
-            vList01.append( i )
-            vList02.append( v01 )
-
-            data = { 'countries': vList01,
-                     'num_restaurants' : vList02 }
-
-            data = pd.DataFrame( data )
-
-            if v01 > v02:
-                v02 = v01
-                vMaiorPais = i
-
-        data.columns = [ 'Países', 'Quantidade de Restaurantes' ]
-        if tp_calc == 'grafico':
-            
-            fig = go.Figure()
-            fig = ( px.bar(data,
-                           text='Quantidade de Restaurantes',
-                           x='Países', y='Quantidade de Restaurantes').update_traces( marker_color='#66b3ff' )
-                                                                      .update_layout( plot_bgcolor='white',
-                                                                                      barmode='stack',
-                                                                                      title_text='Quantidade de Restaurantes Registrados por País',
-                                                                                      title_x=0.3,
-                                                                                      xaxis={'categoryorder': 'total descending'} )
-                                                                    )
-            return fig
-        
-        elif tp_calc == 'maior':
-            return vMaiorPais
-
-    # Média de avaliações por país
-    if flag == 5:
-        for i in df['country_name'].unique():
-            df_aux01 = df.loc[ ( df['country_name'] == i ), [ 'votes' ] ]
-            v01 = df_aux01[ 'votes' ].mean().round(2)
-
-            vList01.append( i )
-            vList02.append( v01 )
-            data = { 'countries': vList01,
-                     'qt_votes' : vList02 }
-
-            data = pd.DataFrame( data )
-
-            if v01 > v02:
-                v02 = v01
-                vMaiorPais = i
-
-        if tp_calc == 'grafico':
-            data.columns = [ 'Países', 'Quantidade de Avaliações' ]
-            fig = go.Figure()
-            fig = ( px.bar(data,
-                           text='Quantidade de Avaliações',
-                           text_auto='f.2',
-                           x='Países', y='Quantidade de Avaliações').update_traces( marker_color='#66b3ff' )
-                                                                      .update_layout( plot_bgcolor='white',
-                                                                                      barmode='stack',
-                                                                                      title_text='Quantidade de Avaliações feitas por País',
-                                                                                      title_x=0.3,
-                                                                                      xaxis={'categoryorder': 'total descending',
-                                                                                             'tickformat': '.0%'} )
-                                                                                      )
-            return fig
         
     # Média de Preço de um prato para duas pessoas por País
     if flag == 6:
@@ -307,18 +204,60 @@ with st.container():
     
 
 with st.container():
-    fig = fnc_calc_per_country( 2, 'grafico', df )
+    df_aux = df.loc[ :, [ 'restaurant_id', 'country_name' ] ].groupby( [ 'country_name' ] ).count().reset_index()
+    df_aux.columns = [ 'Países', 'Quantidade de Restaurantes' ]
+
+    fig = go.Figure()
+    fig = ( px.bar(df_aux,
+                    text='Quantidade de Restaurantes',
+                    x='Países', y='Quantidade de Restaurantes').update_traces( marker_color='#66b3ff' )
+                                                                .update_layout( plot_bgcolor='white',
+                                                                                barmode='stack',
+                                                                                title_text='Quantidade de Restaurantes Registrados por País',
+                                                                                title_x=0.3,
+                                                                                xaxis={'categoryorder': 'total descending'} )
+                                                            )
+
     st.plotly_chart( fig, use_container_width=True )
 
 with st.container():
-    fig = fnc_calc_per_country( 1, 'grafico', df )
+    df_aux = df.loc[ :, [ 'country_name', 'city' ] ].groupby( [ 'country_name' ] ).nunique().sort_values( ['country_name'] ).reset_index()
+    df_aux.columns = [ 'Países', 'Quantidade de Cidades' ]
+
+    fig = go.Figure()
+    fig = ( px.bar(df_aux,
+                    text='Quantidade de Cidades',
+                    x='Países', y='Quantidade de Cidades').update_traces( marker_color='#66b3ff' )
+                                                                .update_layout( plot_bgcolor='white',
+                                                                                barmode='stack',
+                                                                                title_text='Quantidade de Cidades Registradas por País',
+                                                                                title_x=0.3,
+                                                                                xaxis={'categoryorder': 'total descending'} )
+                                                            )
+
     st.plotly_chart( fig, use_container_width=True )
 
 with st.container():
     col1, col2 = st.columns(2)
 
     with col1:
-        fig = fnc_calc_per_country( 5, 'grafico', df )
+        df_aux = df.loc[ :, [ 'country_name', 'votes' ] ].groupby( [ 'country_name' ] ).sum().sort_values( ['country_name'] ).reset_index()
+        df_aux.columns = [ 'Países', 'Quantidade de Avaliações' ]
+        
+        fig = go.Figure()
+        fig = ( px.bar(df_aux,
+                        text='Quantidade de Avaliações',
+                        text_auto='f.2',
+                        x='Países', y='Quantidade de Avaliações').update_traces( marker_color='#66b3ff' )
+                                                                    .update_layout( plot_bgcolor='white',
+                                                                                    barmode='stack',
+                                                                                    title_text='Quantidade de Avaliações feitas por País',
+                                                                                    title_x=0.3,
+                                                                                    xaxis={'categoryorder': 'total descending',
+                                                                                            'tickformat': '.0%'} )
+                                                                                    )
+
+
         st.plotly_chart( fig, use_container_width=True )
     
     with col2:
